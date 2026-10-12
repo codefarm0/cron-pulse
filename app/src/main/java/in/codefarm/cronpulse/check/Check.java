@@ -100,6 +100,21 @@ public class Check {
         this.updatedAt = now;
     }
 
+    // --- Only CheckStateMachine (same package) may call the methods below. ---
+
+    void changeStatus(CheckStatus newStatus, Instant now) {
+        this.status = newStatus;
+        this.updatedAt = now;
+    }
+
+    void setPausedAt(Instant pausedAt) {
+        this.pausedAt = pausedAt;
+    }
+
+    void setNextExpectedAt(Instant nextExpectedAt) {
+        this.nextExpectedAt = nextExpectedAt;
+    }
+
     public Long getId() {
         return id;
     }

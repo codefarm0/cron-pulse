@@ -21,6 +21,7 @@ dependencies {
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.flyway.database.postgresql)
+    implementation(libs.springdoc.openapi.webmvc.ui)
     runtimeOnly(libs.postgresql)
 
     // Dev-only: never packaged into the bootJar or the Docker image.
@@ -40,6 +41,8 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // ./gradlew :app:test -Popenapi.update=true rewrites docs/api/openapi.json (see OpenApiSpecTest).
+    systemProperty("openapi.update", providers.gradleProperty("openapi.update").getOrElse("false"))
 }
 
 tasks.bootRun {

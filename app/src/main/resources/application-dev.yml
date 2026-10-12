@@ -7,3 +7,7 @@ spring:
   flyway:
     # db/dev holds the repeatable seed migration; it is never on the path in other profiles.
     locations: classpath:db/migration,classpath:db/dev
+
+cronpulse:
+  # Use the seeded demo organisation, so the API shows the seed data.
+  default-organization-slug: demo

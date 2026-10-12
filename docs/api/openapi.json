@@ -1,0 +1,493 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "CronPulse API",
+    "description" : "Manage heartbeat checks for cron jobs and background workers.\n\nErrors use RFC 9457 problem+json with a stable `code` property.\nCreate requests accept an `Idempotency-Key` header; updates accept `If-Match` with the ETag from a GET.",
+    "version" : "v1"
+  },
+  "servers" : [ {
+    "url" : "http://localhost",
+    "description" : "Generated server url"
+  } ],
+  "tags" : [ {
+    "name" : "Checks",
+    "description" : "Create and manage monitored jobs"
+  } ],
+  "paths" : {
+    "/api/v1/checks/{id}" : {
+      "get" : {
+        "tags" : [ "Checks" ],
+        "summary" : "Get a check",
+        "description" : "The ETag header holds the version; send it back in If-Match when updating.",
+        "operationId" : "get",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CheckResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Checks" ],
+        "summary" : "Update a check",
+        "description" : "Replaces all editable fields. With If-Match, the update fails with 412 if the check changed since you read it.",
+        "operationId" : "update",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "If-Match",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CheckRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CheckResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Checks" ],
+        "summary" : "Delete a check and its ping history",
+        "operationId" : "delete",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/checks" : {
+      "get" : {
+        "tags" : [ "Checks" ],
+        "summary" : "List checks",
+        "description" : "Sorted by name. Filters are optional and combine with AND.",
+        "operationId" : "list",
+        "parameters" : [ {
+          "name" : "status",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "NEW", "UP", "LATE", "DOWN", "PAUSED" ]
+          }
+        }, {
+          "name" : "tag",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 30,
+            "minLength" : 0
+          }
+        }, {
+          "name" : "q",
+          "in" : "query",
+          "description" : "Case-insensitive search in the name",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseCheckResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Checks" ],
+        "summary" : "Create a check",
+        "description" : "Send an Idempotency-Key header to make retries safe: a repeated key returns the original response.",
+        "operationId" : "create",
+        "parameters" : [ {
+          "name" : "Idempotency-Key",
+          "in" : "header",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 255,
+            "minLength" : 1
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CheckRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/checks/{id}/resume" : {
+      "post" : {
+        "tags" : [ "Checks" ],
+        "summary" : "Resume monitoring",
+        "description" : "The check becomes NEW and turns UP on its next ping.",
+        "operationId" : "resume",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CheckResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/checks/{id}/pause" : {
+      "post" : {
+        "tags" : [ "Checks" ],
+        "summary" : "Pause monitoring",
+        "description" : "No alerts while paused. Pausing twice is harmless.",
+        "operationId" : "pause",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CheckResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/checks/summary" : {
+      "get" : {
+        "tags" : [ "Checks" ],
+        "summary" : "Count checks by status",
+        "operationId" : "summary",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StatusSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "CheckRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "example" : "Nightly DB backup",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "slug" : {
+            "type" : "string",
+            "description" : "URL-friendly id, unique in your organisation. Derived from the name if omitted.",
+            "example" : "nightly-db-backup",
+            "maxLength" : 60,
+            "minLength" : 0,
+            "pattern" : "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "tags" : {
+            "type" : "array",
+            "example" : [ "prod", "postgres" ],
+            "items" : {
+              "type" : "string",
+              "maxLength" : 30,
+              "minLength" : 0,
+              "pattern" : "^[a-z0-9][a-z0-9._-]*$"
+            },
+            "maxItems" : 10,
+            "minItems" : 0
+          },
+          "schedule" : {
+            "$ref" : "#/components/schemas/ScheduleRequest"
+          },
+          "graceSeconds" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "How late a ping may be before the check goes DOWN, in seconds (max 7 days)",
+            "example" : 900,
+            "maximum" : 604800,
+            "minimum" : 0
+          }
+        },
+        "required" : [ "graceSeconds", "name", "schedule" ]
+      },
+      "ScheduleRequest" : {
+        "type" : "object",
+        "description" : "Either a SIMPLE period or a CRON expression in a time zone.",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "enum" : [ "SIMPLE", "CRON" ]
+          },
+          "periodSeconds" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "SIMPLE only: seconds between pings (60 to 31536000)",
+            "example" : 3600,
+            "exclusiveMinimum" : 0
+          },
+          "cron" : {
+            "type" : "string",
+            "description" : "CRON only: classic 5-field cron expression",
+            "example" : "0 2 * * *",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "timeZone" : {
+            "type" : "string",
+            "description" : "IANA time zone for CRON schedules; defaults to UTC",
+            "example" : "Asia/Kolkata",
+            "maxLength" : 64,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "type" ]
+      },
+      "CheckResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid",
+            "description" : "Public id used in API URLs"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "tags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "schedule" : {
+            "$ref" : "#/components/schemas/ScheduleResponse"
+          },
+          "graceSeconds" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "NEW", "UP", "LATE", "DOWN", "PAUSED" ]
+          },
+          "pingUrl" : {
+            "type" : "string",
+            "format" : "uri",
+            "description" : "The URL your job calls. Treat it as a secret."
+          },
+          "lastPingAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "nextExpectedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "pausedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "ScheduleResponse" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "enum" : [ "SIMPLE", "CRON" ]
+          },
+          "periodSeconds" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "cron" : {
+            "type" : "string"
+          },
+          "timeZone" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PageResponseCheckResponse" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CheckResponse"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "StatusSummaryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "byStatus" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        }
+      }
+    }
+  }
+}

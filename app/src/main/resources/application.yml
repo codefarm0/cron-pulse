@@ -17,6 +17,10 @@ spring:
       ddl-auto: validate
     # Don't hold a DB connection open while rendering a response.
     open-in-view: false
+  mvc:
+    # Spring MVC's own errors (404, 405, 415…) use RFC 9457 problem+json, like ours.
+    problemdetails:
+      enabled: true
   docker:
     compose:
       # `./gradlew :app:bootRun` starts Postgres and Mailpit; `stop` keeps their data between runs.
@@ -37,3 +41,15 @@ management:
     health:
       probes:
         enabled: true
+
+springdoc:
+  # Only document the public API, not actuator or (later) UI pages.
+  paths-to-match: /api/**
+  swagger-ui:
+    path: /swagger-ui.html
+
+cronpulse:
+  # The URL jobs use to reach CronPulse; ping URLs in API responses are built from it.
+  public-base-url: ${CRONPULSE_PUBLIC_BASE_URL:http://localhost:8080}
+  # Until login exists (Phase 4), every request acts for this organisation (created if missing).
+  default-organization-slug: default

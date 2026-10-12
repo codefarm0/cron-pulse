@@ -277,7 +277,8 @@ stateDiagram-v2
     LATE --> PAUSED: pause
     DOWN --> PAUSED: pause
     NEW --> PAUSED: pause
-    PAUSED --> UP: resume or ping
+    PAUSED --> NEW: resume
+    PAUSED --> UP: success ping
 ```
 
 **Detector sweep.** Runs on every instance; `SKIP LOCKED` hands each instance a different batch, so they share the work and never process the same check twice.
@@ -373,7 +374,7 @@ Rules:
 | UP | Last ping on time and successful |
 | LATE | Past `nextExpectedAt`, still inside the grace period. No alert yet. |
 | DOWN | Past grace, or a fail ping received. Alert sent. |
-| PAUSED | Monitoring off. A ping un-pauses it (configurable). |
+| PAUSED | Monitoring off. Resume moves it to NEW (we don't know when the next ping will come); a success ping moves it to UP (configurable). |
 
 Transitions:
 - Success ping: any → UP (if previous was DOWN, queue a **recovery** alert)
