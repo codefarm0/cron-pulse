@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Check detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F4F4F1}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F4F4F1; color: #17171A; font-family: 'Geist', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+  <header style="background: #17171A; color: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+      <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; color: #FFFFFF; text-decoration: none">
+        <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="6" fill="#2F2F35"></rect><path d="M3 14h5l2.5-6 4 11 2.5-5H23" stroke="#4ADE80" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <span style="font-weight: 700; font-size: 17px; letter-spacing: -0.01em">CronPulse</span>
+      </a>
+      <nav style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px">
+        <a href="Main.dc.html" style="padding: 10px 14px; border-radius: 6px; background: #2F2F35; color: #FFFFFF; text-decoration: none; font-weight: 500">Checks</a>
+        <a href="Channels.dc.html" style="padding: 10px 14px; border-radius: 6px; color: #C8C8CE; text-decoration: none">Alert channels</a>
+        <a href="https://codefarm.in" style="padding: 10px 14px; border-radius: 6px; color: #C8C8CE; text-decoration: none">Docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main style="max-width: 1200px; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <a href="Main.dc.html" style="font-size: 14px; text-decoration: none">← Checks</a>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+          <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">nightly-db-backup</h1>
+          <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: 14px; font-weight: 600; color: #B42318; background: #FCE8E6"><span style="width: 8px; height: 8px; border-radius: 999px; background: #B42318" aria-hidden="true"></span>Down</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px">
+          <button style="font: inherit; font-weight: 500; min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #C9C9C2; background: #FFFFFF; color: #17171A; cursor: pointer">Pause</button>
+          <a href="NewCheck.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #C9C9C2; background: #FFFFFF; color: #17171A; text-decoration: none; font-weight: 500">Edit</a>
+          <button style="font: inherit; font-weight: 500; min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #F0C2BC; background: #FFFFFF; color: #B42318; cursor: pointer">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <section role="alert" style="background: #FCE8E6; border: 1px solid #F0C2BC; border-radius: 10px; padding: 16px 20px; color: #7A1A12">
+      <strong style="font-weight: 600">Expected at 02:00 IST today, no ping received.</strong> Marked down at 02:15 IST after the grace period. Alerts sent to Email and Slack.
+    </section>
+
+    <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px">
+      <sc-for list="{{facts}}" as="f" hint-placeholder-count="4">
+        <div style="background: #FFFFFF; border: 1px solid #E2E2DC; border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px">
+          <span style="font-size: 13px; color: #5A5A63">{{f.label}}</span>
+          <span style="font-size: 17px; font-weight: 600">{{f.value}}</span>
+          <span style="font-size: 13px; color: #5A5A63">{{f.sub}}</span>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #E2E2DC; border-radius: 10px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+      <h2 style="margin: 0; font-size: 17px; font-weight: 600">Ping URL</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch">
+        <code style="flex: 1 1 360px; min-width: 0; overflow-x: auto; white-space: nowrap; font-family: 'Geist Mono', monospace; font-size: 14px; padding: 12px 14px; border-radius: 8px; background: #F4F4F1; border: 1px solid #E2E2DC">https://[your-host]/ping/7f3a9c2e-41d8-4b6e-9a0f-2c5d8e1b3a77</code>
+        <button style="font: inherit; font-weight: 600; min-height: 44px; padding: 0 16px; border-radius: 8px; border: 0; background: #17171A; color: #FFFFFF; cursor: pointer">Copy URL</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0">
+        <div role="tablist" aria-label="Code snippets" style="display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid #E2E2DC">
+          <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+            <button role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+          </sc-for>
+        </div>
+        <pre style="margin: 0; padding: 16px; background: #17171A; color: #E8E8EC; border-radius: 0 0 8px 8px; font-family: 'Geist Mono', monospace; font-size: 13px; line-height: 1.7; overflow-x: auto; white-space: pre">{{snippet}}</pre>
+      </div>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #E2E2DC; border-radius: 10px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+        <h2 style="margin: 0; font-size: 17px; font-weight: 600">Last 14 days</h2>
+        <span style="font-size: 14px; color: #5A5A63">Uptime 92.9%</span>
+      </div>
+      <div role="img" aria-label="14 days: 12 up, 1 failed run, today down" style="display: grid; grid-template-columns: repeat(14, minmax(0, 1fr)); gap: 4px">
+        <sc-for list="{{days}}" as="d" hint-placeholder-count="14">
+          <span style="{{d}}"></span>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 13px; color: #5A5A63">
+        <span>29 Sep</span>
+        <span style="display: flex; flex-wrap: wrap; gap: 14px">
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 2px; background: #1F7A4D" aria-hidden="true"></span>Up</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 2px; background: #E8A35A" aria-hidden="true"></span>Failed run</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 2px; background: #B42318" aria-hidden="true"></span>Down</span>
+        </span>
+        <span>Today</span>
+      </div>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #E2E2DC; border-radius: 10px; display: flex; flex-direction: column">
+      <div style="padding: 20px 24px 8px">
+        <h2 style="margin: 0; font-size: 17px; font-weight: 600">Ping log</h2>
+      </div>
+      <div style="overflow-x: auto">
+        <table style="width: 100%; min-width: 760px; border-collapse: collapse">
+          <thead>
+            <tr style="text-align: left; font-size: 13px; color: #5A5A63">
+              <th style="padding: 10px 24px; font-weight: 500">Received</th>
+              <th style="padding: 10px 16px; font-weight: 500">Type</th>
+              <th style="padding: 10px 16px; font-weight: 500">Duration</th>
+              <th style="padding: 10px 16px; font-weight: 500">Source</th>
+              <th style="padding: 10px 24px 10px 16px; font-weight: 500">Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{pings}}" as="p" hint-placeholder-count="6">
+              <tr style="border-top: 1px solid #ECECE7; vertical-align: top">
+                <td style="padding: 12px 24px; font-family: 'Geist Mono', monospace; font-size: 13px; white-space: nowrap">{{p.at}}</td>
+                <td style="padding: 12px 16px"><span style="{{p.style}}">{{p.type}}</span></td>
+                <td style="padding: 12px 16px; font-family: 'Geist Mono', monospace; font-size: 13px">{{p.dur}}</td>
+                <td style="padding: 12px 16px; font-size: 13px; color: #3A3A42">{{p.src}}</td>
+                <td style="padding: 12px 24px 12px 16px">
+                  <details>
+                    <summary style="cursor: pointer; font-size: 13px; color: #1D4ED8">{{p.summary}}</summary>
+                    <pre style="margin: 8px 0 0; padding: 10px 12px; border-radius: 6px; background: #F4F4F1; font-family: 'Geist Mono', monospace; font-size: 12px; white-space: pre-wrap">{{p.body}}</pre>
+                  </details>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1400}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'curl' };
+  }
+  renderVals() {
+    const url = 'https://[your-host]/ping/7f3a9c2e-41d8-4b6e-9a0f-2c5d8e1b3a77';
+    const snippets = {
+      curl: '# crontab: ping only if the backup succeeds\n0 2 * * * /opt/scripts/backup.sh && curl -fsS -m 10 --retry 3 ' + url + '\n\n# or report the exit code either way\n/opt/scripts/backup.sh; curl -fsS -m 10 ' + url + '/$?',
+      spring: '// build.gradle.kts\nimplementation("in.codefarm:cron-pulse-spring-boot-starter:0.1.0")\n\n// application.yml\ncronpulse.base-url: https://[your-host]\ncronpulse.jobs.nightly-db-backup: 7f3a9c2e-41d8-4b6e-9a0f-2c5d8e1b3a77\n\n// your job\n@Scheduled(cron = "0 0 2 * * *", zone = "Asia/Kolkata")\n@CronPulse("nightly-db-backup")\npublic void backup() { ... }',
+      python: 'import requests\n\nPING = "' + url + '"\n\nrequests.get(PING + "/start", timeout=10)\ntry:\n    run_backup()\n    requests.get(PING, timeout=10)\nexcept Exception as e:\n    requests.post(PING + "/fail", data=str(e), timeout=10)\n    raise'
+    };
+    const tabStyle = (on) => 'font: inherit; font-size: 14px; min-height: 44px; padding: 0 16px; border: 0; border-bottom: 2px solid ' + (on ? '#17171A' : 'transparent') + '; background: transparent; cursor: pointer; color: ' + (on ? '#17171A; font-weight: 600' : '#5A5A63');
+    const day = (k) => 'height: 32px; border-radius: 3px; background: ' + (k === 'd' ? '#B42318' : k === 'f' ? '#E8A35A' : '#1F7A4D');
+    const typeStyle = (t) => {
+      const m = { Success: ['#1F7A4D', '#E4F3EA'], Start: ['#1D4ED8', '#E6EDFC'], Fail: ['#B42318', '#FCE8E6'] }[t];
+      return 'display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; color: ' + m[0] + '; background: ' + m[1];
+    };
+    const pings = [
+      { at: '11 Oct 02:14:52', type: 'Success', dur: '14m 39s', src: '10.0.4.17 · curl/8.5', summary: 'Backup complete', body: 'pg_dump: 4.2 GB written\nupload to s3://backups/2026-10-11 ok\nBackup complete' },
+      { at: '11 Oct 02:00:13', type: 'Start', dur: '-', src: '10.0.4.17 · curl/8.5', summary: 'No output', body: '(empty)' },
+      { at: '10 Oct 02:13:20', type: 'Success', dur: '13m 08s', src: '10.0.4.17 · curl/8.5', summary: 'Backup complete', body: 'pg_dump: 4.1 GB written\nupload to s3://backups/2026-10-10 ok\nBackup complete' },
+      { at: '10 Oct 02:00:12', type: 'Start', dur: '-', src: '10.0.4.17 · curl/8.5', summary: 'No output', body: '(empty)' },
+      { at: '09 Oct 02:03:41', type: 'Fail', dur: '3m 29s', src: '10.0.4.17 · curl/8.5', summary: 'exit code 1', body: 'pg_dump: error: connection to server failed: timeout\nexit code 1' },
+      { at: '09 Oct 02:00:12', type: 'Start', dur: '-', src: '10.0.4.17 · curl/8.5', summary: 'No output', body: '(empty)' }
+    ];
+    return {
+      facts: [
+        { label: 'Schedule', value: '0 2 * * *', sub: 'Every day at 02:00 IST' },
+        { label: 'Grace period', value: '15 minutes', sub: 'Down after 02:15 IST' },
+        { label: 'Last ping', value: '11 Oct, 02:14 IST', sub: 'Success · took 14m 39s' },
+        { label: 'Average duration', value: '13m 52s', sub: 'Last 10 runs' }
+      ],
+      tabs: [['curl', 'curl / crontab'], ['spring', 'Spring Boot'], ['python', 'Python']].map(([id, label]) => {
+        const on = this.state.tab === id;
+        return { label, on: on ? 'true' : 'false', style: tabStyle(on), pick: () => this.setState({ tab: id }) };
+      }),
+      snippet: snippets[this.state.tab],
+      days: 'uuuuuuuuuufuud'.split('').map(day),
+      pings: pings.map((p) => ({ ...p, style: typeStyle(p.type) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

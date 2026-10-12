@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Checks dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;background:#F4F4F1}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F4F4F1; color: #17171A; font-family: 'Geist', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+  <header style="background: #17171A; color: #FFFFFF">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+      <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; color: #FFFFFF; text-decoration: none">
+        <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="6" fill="#2F2F35"></rect><path d="M3 14h5l2.5-6 4 11 2.5-5H23" stroke="#4ADE80" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <span style="font-weight: 700; font-size: 17px; letter-spacing: -0.01em">CronPulse</span>
+      </a>
+      <nav style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px">
+        <a href="Main.dc.html" style="padding: 10px 14px; border-radius: 6px; background: #2F2F35; color: #FFFFFF; text-decoration: none; font-weight: 500">Checks</a>
+        <a href="Channels.dc.html" style="padding: 10px 14px; border-radius: 6px; color: #C8C8CE; text-decoration: none">Alert channels</a>
+        <a href="https://codefarm.in" style="padding: 10px 14px; border-radius: 6px; color: #C8C8CE; text-decoration: none">Docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main style="max-width: 1200px; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Checks</h1>
+        <span style="color: #5A5A63">6 of 10 checks used on the Free plan</span>
+      </div>
+      <a href="NewCheck.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 8px; background: #1D4ED8; color: #FFFFFF; text-decoration: none; font-weight: 600">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"></path></svg>
+        New check
+      </a>
+    </div>
+
+    <section aria-label="Status summary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px">
+      <sc-for list="{{summary}}" as="s" hint-placeholder-count="4">
+        <div style="background: #FFFFFF; border: 1px solid #E2E2DC; border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px">
+          <span style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #5A5A63"><span style="{{s.dot}}" aria-hidden="true"></span>{{s.label}}</span>
+          <span style="font-size: 34px; font-weight: 700; line-height: 1; letter-spacing: -0.02em">{{s.count}}</span>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #E2E2DC; border-radius: 10px; display: flex; flex-direction: column">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #E2E2DC">
+        <div role="group" aria-label="Filter by status" style="display: flex; flex-wrap: wrap; gap: 6px">
+          <sc-for list="{{filters}}" as="f" hint-placeholder-count="5">
+            <button onClick="{{f.pick}}" aria-pressed="{{f.on}}" style="{{f.style}}">{{f.label}}</button>
+          </sc-for>
+        </div>
+        <label style="display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border: 1px solid #D4D4CE; border-radius: 8px; flex: 0 1 260px">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="#5A5A63" stroke-width="1.6" fill="none"></circle><path d="M10.5 10.5L14 14" stroke="#5A5A63" stroke-width="1.6" stroke-linecap="round"></path></svg>
+          <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search checks</span>
+          <input type="search" placeholder="Search checks" style="border: 0; outline-offset: 4px; font: inherit; width: 100%; background: transparent">
+        </label>
+      </div>
+      <div style="overflow-x: auto">
+        <table style="width: 100%; min-width: 860px; border-collapse: collapse">
+          <thead>
+            <tr style="text-align: left; font-size: 13px; color: #5A5A63">
+              <th style="padding: 12px 16px; font-weight: 500">Status</th>
+              <th style="padding: 12px 16px; font-weight: 500">Name</th>
+              <th style="padding: 12px 16px; font-weight: 500">Schedule</th>
+              <th style="padding: 12px 16px; font-weight: 500">Last ping</th>
+              <th style="padding: 12px 16px; font-weight: 500">Next expected</th>
+              <th style="padding: 12px 16px; font-weight: 500">Last 20 pings</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
+              <tr style="border-top: 1px solid #ECECE7">
+                <td style="padding: 14px 16px"><span style="{{r.badge}}"><span style="{{r.dot}}" aria-hidden="true"></span>{{r.status}}</span></td>
+                <td style="padding: 14px 16px">
+                  <a href="CheckDetail.dc.html" style="color: #17171A; font-weight: 600; text-decoration: none">{{r.name}}</a>
+                  <div style="font-size: 13px; color: #5A5A63">{{r.tags}}</div>
+                </td>
+                <td style="padding: 14px 16px; font-family: 'Geist Mono', monospace; font-size: 13px">{{r.schedule}}</td>
+                <td style="padding: 14px 16px; color: #3A3A42">{{r.last}}</td>
+                <td style="padding: 14px 16px; color: #3A3A42">{{r.next}}</td>
+                <td style="padding: 14px 16px">
+                  <div role="img" aria-label="{{r.sparkLabel}}" style="display: flex; gap: 2px; align-items: flex-end; height: 22px">
+                    <sc-for list="{{r.spark}}" as="b" hint-placeholder-count="20">
+                      <span style="{{b}}"></span>
+                    </sc-for>
+                  </div>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":980}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { filter: 'All' };
+  }
+  renderVals() {
+    const C = { Up: '#1F7A4D', Late: '#B45309', Down: '#B42318', Paused: '#6B6B73', New: '#1D4ED8' };
+    const BG = { Up: '#E4F3EA', Late: '#FDF0E1', Down: '#FCE8E6', Paused: '#EDEDEA', New: '#E6EDFC' };
+    const dot = (s) => 'width: 8px; height: 8px; border-radius: 999px; background: ' + C[s] + '; flex-shrink: 0; display: inline-block';
+    const badge = (s) => 'display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; color: ' + C[s] + '; background: ' + BG[s];
+    const bar = (k) => 'width: 5px; border-radius: 1px; height: ' + (k === 'f' ? '22px; background: #B42318' : k === 'm' ? '6px; background: #D4D4CE' : '14px; background: #1F7A4D');
+    const spark = (pattern) => pattern.split('').map(bar);
+    const all = [
+      { status: 'Down', name: 'nightly-db-backup', tags: 'prod · postgres', schedule: '0 2 * * * IST', last: '1 day ago', next: 'Overdue by 4h 10m', p: 'ssssssssssssssssssmm', label: '18 on time, 2 missed' },
+      { status: 'Late', name: 'invoice-generator', tags: 'billing', schedule: 'every 1 hour', last: '1h 6m ago', next: 'In grace · 9m left', p: 'ssssssssssssssssssss', label: '20 on time' },
+      { status: 'Up', name: 'search-index-sync', tags: 'prod', schedule: 'every 15 min', last: '3 min ago', next: 'in 12 min', p: 'sssssssfssssssssssss', label: '19 on time, 1 failed' },
+      { status: 'Up', name: 'cleanup-temp-files', tags: 'ops', schedule: '*/30 * * * * UTC', last: '11 min ago', next: 'in 19 min', p: 'ssssssssssssssssssss', label: '20 on time' },
+      { status: 'Paused', name: 'weekly-report-email', tags: 'marketing', schedule: '0 9 * * MON IST', last: '8 days ago', next: 'Paused', p: 'ssssssssssssssssmmmm', label: 'paused' },
+      { status: 'New', name: 'ml-feature-refresh', tags: 'data', schedule: 'every 6 hours', last: 'Never', next: 'Waiting for first ping', p: 'mmmmmmmmmmmmmmmmmmmm', label: 'no pings yet' }
+    ];
+    const f = this.state.filter;
+    const counts = { Up: 2, Late: 1, Down: 1, Paused: 1 };
+    return {
+      summary: ['Up', 'Late', 'Down', 'Paused'].map((s) => ({ label: s, count: String(counts[s]), dot: dot(s) })),
+      filters: ['All', 'Up', 'Late', 'Down', 'Paused'].map((label) => {
+        const on = f === label;
+        return { label, on: on ? 'true' : 'false', pick: () => this.setState({ filter: label }),
+          style: 'font: inherit; font-size: 14px; min-height: 40px; padding: 0 14px; border-radius: 999px; cursor: pointer; ' + (on ? 'background: #17171A; color: #FFFFFF; border: 1px solid #17171A' : 'background: #FFFFFF; color: #3A3A42; border: 1px solid #D4D4CE') };
+      }),
+      rows: all.filter((r) => f === 'All' || r.status === f).map((r) => ({ ...r, dot: dot(r.status), badge: badge(r.status), spark: spark(r.p), sparkLabel: 'Last 20 pings: ' + r.label }))
+    };
+  }
+}
+</script>
+</body>
+</html>
