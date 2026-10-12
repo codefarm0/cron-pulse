@@ -2,6 +2,7 @@
 #
 #   ./gradlew bootRun             -> Spring Boot starts postgres + mailpit from this file automatically
 #   docker compose --profile app up    -> runs the whole stack in containers, including the app
+#   docker compose --profile load run --rm k6 run /load/ping-baseline.js   -> k6 load test (needs the app up)
 #
 # Values come from .env (copy .env.example). The defaults below are for local development only.
 name: cron-pulse
@@ -42,6 +43,16 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  # Load tests from load/, run against the app container on the same Docker network:
+  #   docker compose --profile load run --rm k6 run /load/ping-baseline.js
+  k6:
+    profiles: ["load"]
+    image: grafana/k6:2.3.0
+    volumes:
+      - ./load:/load:ro
+    environment:
+      BASE_URL: http://app:8080
 
 volumes:
   postgres-data:
