@@ -17,6 +17,12 @@ spring:
       ddl-auto: validate
     # Don't hold a DB connection open while rendering a response.
     open-in-view: false
+  flyway:
+    # The dev seed (db/dev/R__dev_seed.sql) is a repeatable migration that only the dev profile can see.
+    # When `./gradlew bootRun` has seeded the shared compose database, the app container (no dev
+    # profile) would otherwise refuse to start with "applied migration not resolved locally".
+    # Only repeatable migrations are excused; versioned ones are still validated strictly.
+    ignore-migration-patterns: "*:future,repeatable:missing"
   mvc:
     # Spring MVC's own errors (404, 405, 415…) use RFC 9457 problem+json, like ours.
     problemdetails:
