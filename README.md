@@ -42,7 +42,7 @@ stateDiagram-v2
 
 CronPulse is designed as if real companies depend on it: multi-tenant from the first migration, horizontally scalable, and observable. The working targets are **100k checks**, **2,000 pings/s sustained** with **10,000/s bursts** at the top of the hour, **p99 < 50 ms** ingest latency, and DOWN detection within **60 s**. See the [roadmap](docs/planning/ROADMAP.md#2-what-enterprise-grade-means-here) for the full list of non-functional requirements.
 
-**Stack:** Java 21+, Spring Boot, Spring MVC (REST API + Thymeleaf UI), PostgreSQL + Flyway, ShedLock / `SKIP LOCKED`, Redis (rate limits, from Phase 5), Micrometer + OpenTelemetry → [OpenObserve](https://openobserve.ai/) (logs, metrics, traces, dashboards), Docker, Testcontainers, WireMock, k6.
+**Stack:** Java 25, Spring Boot 4.1, Spring MVC (REST API + Thymeleaf UI), PostgreSQL + Flyway, ShedLock / `SKIP LOCKED`, Redis (rate limits, from Phase 5), Micrometer + OpenTelemetry → [OpenObserve](https://openobserve.ai/) (logs, metrics, traces, dashboards), Docker, Testcontainers, WireMock, k6.
 
 ---
 
@@ -53,8 +53,8 @@ Full steps, Definition of Done and story outlines: **[docs/planning/ROADMAP.md](
 
 | # | Phase | Learning takeaway | Story | Status |
 |---|---|---|---|---|
-| 1 | Foundations: repo, data model and REST API | Some decisions are cheap on day one and very expensive later | — | 🔜 Next |
-| 2 | The heartbeat engine: pings, schedules and detection | Alert on the *absence* of a signal: the dead man's switch | — | Planned |
+| 1 | Foundations: repo, data model and REST API | Some decisions are cheap on day one and very expensive later | [Draft](docs/learnings/phase-1-foundations.md) | ✅ Built · story in draft |
+| 2 | The heartbeat engine: pings, schedules and detection | Alert on the *absence* of a signal: the dead man's switch | — | 🔜 Next |
 | 3 | Observability and reliable alerts | You can't make delivery reliable if you can't see it | — | Planned |
 | 4 | The product: UI, starter and multi-tenant security | One service layer, many front doors, and tenants that never see each other | — | Planned |
 | 5 | Enterprise scale and production readiness | Measure, fix one bottleneck, measure again, and make deploys boring | — | Planned |
@@ -83,19 +83,43 @@ Several instances behind a load balancer, time-partitioned ping storage, Redis-b
 
 ## Run it locally
 
-> Available from Phase 1. The only prerequisites are **a JDK (21+) and Docker**.
+> The only prerequisites are **JDK 25 and Docker**.
 
 ```bash
 ./gradlew :app:bootRun              # starts Postgres + Mailpit in Docker automatically
 docker compose --profile app up     # or run the whole stack in containers
 ```
 
+Ports can be changed in `.env` (copy `.env.example`). If 8080 is taken, run with `SERVER_PORT=8081 ./gradlew :app:bootRun` or set `APP_PORT` for Docker.
+
 | Service | URL |
 |---|---|
 | App / UI | http://localhost:8080 |
 | Swagger UI (Phase 1+) | http://localhost:8080/swagger-ui.html |
 | Mailpit (caught emails) | http://localhost:8025 |
+| PostgreSQL | `localhost:15432`, db/user `cronpulse` (password from `.env`, default `cronpulse`) |
 | OpenObserve: logs, metrics, traces (Phase 3+, `--profile observability`) | http://localhost:5080 |
+
+## Use the API
+
+The management API lives under `/api/v1` and is documented with OpenAPI: browse it at http://localhost:8080/swagger-ui.html, or read the contract in [`docs/api/openapi.json`](docs/api/openapi.json).
+
+```bash
+# create a check (safe to retry: the same Idempotency-Key returns the original response)
+curl -s -X POST localhost:8080/api/v1/checks \
+  -H 'Content-Type: application/json' -H 'Idempotency-Key: 6f1d…' \
+  -d '{"name":"Nightly backup","tags":["prod"],
+       "schedule":{"type":"CRON","cron":"0 2 * * *","timeZone":"Asia/Kolkata"},
+       "graceSeconds":900}'
+
+curl -s 'localhost:8080/api/v1/checks?status=DOWN&tag=prod&page=0&size=20'   # list, filter, page
+curl -s localhost:8080/api/v1/checks/summary                                   # counts by status
+curl -s -i localhost:8080/api/v1/checks/{id}                                   # note the ETag header
+curl -s -X PUT localhost:8080/api/v1/checks/{id} -H 'If-Match: "0"' …          # 412 if it changed meanwhile
+curl -s -X POST localhost:8080/api/v1/checks/{id}/pause                        # or /resume
+```
+
+Every error is `application/problem+json` with a stable `code` (e.g. `VALIDATION_FAILED`, `CHECK_NOT_FOUND`, `SLUG_TAKEN`, `PRECONDITION_FAILED`). Every check in the response has a `pingUrl`: the URL your job calls (Phase 2).
 
 ## Repository layout
 
@@ -108,6 +132,7 @@ docs/
   planning/ROADMAP.md             # phase plan, scale targets, publishing plan
   learnings/                      # one note per phase → Medium story
   adr/                            # architecture decision records
+  api/openapi.json                # the API contract, kept in sync by a test
   ui/                             # UI mock designs
 CLAUDE.md                         # build brief: architecture, behaviour, rules
 ```
