@@ -87,8 +87,8 @@ class CheckRepositoryTest {
     void findsACheckByItsPingUuid() {
         var saved = checks.saveAndFlush(hourly(acme, "backup"));
 
-        assertThat(checks.findByPingUuid(saved.getPingUuid())).contains(saved);
-        assertThat(checks.findByPingUuid(UUID.randomUUID())).isEmpty();
+        assertThat(checks.findIdByPingUuid(saved.getPingUuid())).contains(saved.getId());
+        assertThat(checks.findIdByPingUuid(UUID.randomUUID())).isEmpty();
     }
 
     @Test

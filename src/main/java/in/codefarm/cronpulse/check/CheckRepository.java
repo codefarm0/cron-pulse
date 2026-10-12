@@ -1,11 +1,13 @@
 package in.codefarm.cronpulse.check;
 
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,8 +21,23 @@ public interface CheckRepository extends JpaRepository<Check, Long> {
 
     boolean existsByOrganizationIdAndSlug(Long organizationId, String slug);
 
-    /** Used by the ping endpoint (Phase 2): the ping UUID is the only credential a ping carries. */
-    Optional<Check> findByPingUuid(UUID pingUuid);
+    /**
+     * The ping endpoint's first lookup: the ping UUID is the only credential a ping carries.
+     * Selects just the id, so the (cached) answer is tiny and needs no entity.
+     */
+    @Query("select c.id from Check c where c.pingUuid = :pingUuid")
+    Optional<Long> findIdByPingUuid(@Param("pingUuid") UUID pingUuid);
+
+    /**
+     * Loads a check and locks its row ({@code SELECT … FOR UPDATE}) until the transaction ends.
+     * <p>
+     * Pings for the same check are applied one after another, so two concurrent pings can't both
+     * read the old state and overwrite each other's update. Pings for different checks don't wait
+     * for each other, because each locks only its own row.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select c from Check c where c.id = :id")
+    Optional<Check> findByIdForUpdate(@Param("id") long id);
 
     /**
      * Lists checks with optional filters. A null parameter means "no filter".

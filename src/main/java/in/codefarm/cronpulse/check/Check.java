@@ -14,7 +14,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.type.SqlTypes;
 
 /**
@@ -23,9 +25,16 @@ import org.hibernate.type.SqlTypes;
  * The organisation is stored as a plain id rather than a {@code @ManyToOne}: every query filters on
  * it, and nothing needs to load the organisation itself. That keeps tenant scoping explicit and
  * avoids accidental lazy loading.
+ * <p>
+ * The {@code @Version} (exposed as the API's ETag) protects what a <em>user</em> edits. The ping
+ * times are written by jobs, many times an hour, so they are excluded from it: otherwise every ping
+ * would make the ETag a user just fetched stale, and their next edit would fail with 412.
+ * {@code @DynamicUpdate} makes Hibernate write only the columns that changed, so a user's edit can't
+ * overwrite a ping time with the old value it loaded, and a ping can't overwrite a user's edit.
  */
 @Entity
 @Table(name = "checks")
+@DynamicUpdate
 public class Check {
 
     @Id
@@ -61,8 +70,13 @@ public class Check {
     @Column(nullable = false)
     private CheckStatus status;
 
+    /** When the last SUCCESS or FAIL ping arrived. A START ping doesn't count: the job hasn't finished. */
+    @OptimisticLock(excluded = true)
     private Instant lastPingAt;
+
+    @OptimisticLock(excluded = true)
     private Instant lastStartAt;
+
     private Instant nextExpectedAt;
     private Instant pausedAt;
 
@@ -113,6 +127,14 @@ public class Check {
 
     void setNextExpectedAt(Instant nextExpectedAt) {
         this.nextExpectedAt = nextExpectedAt;
+    }
+
+    void setLastPingAt(Instant lastPingAt) {
+        this.lastPingAt = lastPingAt;
+    }
+
+    void setLastStartAt(Instant lastStartAt) {
+        this.lastStartAt = lastStartAt;
     }
 
     public Long getId() {

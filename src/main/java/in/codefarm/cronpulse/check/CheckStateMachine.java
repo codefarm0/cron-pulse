@@ -1,6 +1,8 @@
 package in.codefarm.cronpulse.check;
 
+import in.codefarm.cronpulse.ping.PingType;
 import java.time.Clock;
+import java.time.Instant;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,7 +12,8 @@ import org.springframework.stereotype.Component;
  * later which alerts are queued) can be read and tested in one place. The status mutators on
  * {@link Check} are package-private, so code outside this package can't bypass it.
  * <p>
- * Phase 1 handles pause and resume. Pings and the detector add their transitions in Phase 2.
+ * Phase 1 handles pause and resume. Step 2.1 records ping times; step 2.3 adds the ping and
+ * detector transitions.
  */
 @Component
 public class CheckStateMachine {
@@ -46,6 +49,21 @@ public class CheckStateMachine {
         }
         check.setPausedAt(null);
         transition(check, CheckStatus.NEW, reason);
+    }
+
+    /**
+     * Applies a received ping to its check. The caller must hold the check's row lock
+     * ({@link CheckRepository#findByIdForUpdate}) so concurrent pings are applied one at a time.
+     * <p>
+     * For now this only records when the ping arrived; step 2.3 adds the status transitions.
+     *
+     * @param receivedAt when the ping arrived; the same instant is stored on the ping row
+     */
+    public void applyPing(Check check, PingType type, Instant receivedAt) {
+        switch (type) {
+            case START -> check.setLastStartAt(receivedAt);
+            case SUCCESS, FAIL -> check.setLastPingAt(receivedAt);
+        }
     }
 
     private void transition(Check check, CheckStatus to, String reason) {

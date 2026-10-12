@@ -21,6 +21,7 @@ repositories {
 // version from Spring Boot, so upgrading Spring Boot upgrades the whole stack consistently.
 ext {
     springdocVersion = '3.1.1'
+    bucket4jVersion = '8.21.0'
 }
 
 dependencies {
@@ -31,6 +32,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation 'org.flywaydb:flyway-database-postgresql'
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    implementation "com.bucket4j:bucket4j_jdk17-core:${bucket4jVersion}"
     runtimeOnly 'org.postgresql:postgresql'
 
     // Dev-only: never packaged into the bootJar or the Docker image.

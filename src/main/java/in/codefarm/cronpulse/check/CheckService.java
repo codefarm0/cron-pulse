@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,11 +23,14 @@ public class CheckService {
 
     private final CheckRepository checks;
     private final CheckStateMachine stateMachine;
+    private final ApplicationEventPublisher events;
     private final Clock clock;
 
-    CheckService(CheckRepository checks, CheckStateMachine stateMachine, Clock clock) {
+    CheckService(CheckRepository checks, CheckStateMachine stateMachine, ApplicationEventPublisher events,
+            Clock clock) {
         this.checks = checks;
         this.stateMachine = stateMachine;
+        this.events = events;
         this.clock = clock;
     }
 
@@ -73,7 +77,9 @@ public class CheckService {
     }
 
     public void delete(long organizationId, UUID publicId) {
-        checks.delete(get(organizationId, publicId));
+        var check = get(organizationId, publicId);
+        checks.delete(check);
+        events.publishEvent(new CheckDeletedEvent(check.getPingUuid()));
     }
 
     public Check pause(long organizationId, UUID publicId) {
