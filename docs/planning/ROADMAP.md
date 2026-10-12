@@ -102,7 +102,7 @@ Every instance runs the same code: web traffic, the detector and the outbox send
 | # | Phase | Headline takeaway | Medium story (working title) | Status |
 |---|---|---|---|---|
 | 1 | Foundations: repo, data model and REST API | Some decisions are cheap on day one and very expensive later: make them now | Who Watches the Cron Jobs? Laying Enterprise Foundations for a Heartbeat Monitor in Spring Boot | ✅ Built · story in draft |
-| 2 | The heartbeat engine: pings, schedules and detection | Alert on the *absence* of a signal: building a dead man's switch | Building a Dead Man's Switch: High-Volume Pings, Cron Time Zones and a Detector That Runs Everywhere | 🔜 Next |
+| 2 | The heartbeat engine: pings, schedules and detection | Alert on the *absence* of a signal: building a dead man's switch | Building a Dead Man's Switch: High-Volume Pings, Cron Time Zones and a Detector That Runs Everywhere | 🚧 In progress (2.1 done) |
 | 3 | Observability and reliable alerts | You can't make delivery reliable if you can't see it | Reliable Alerts You Can See: The Transactional Outbox, Observed with OpenTelemetry and OpenObserve | Planned |
 | 4 | The product: UI, starter and multi-tenant security | One service layer, many front doors, and tenants that never see each other | From Service to Product: Thymeleaf UI, a Spring Boot Starter and Multi-Tenant Security | Planned |
 | 5 | Enterprise scale and production readiness | Measure, find the bottleneck, fix one thing, and make deploys boring | From 300 to 3,000 Requests per Second: Scaling and Shipping a Spring Boot Service to Production | Planned |
@@ -202,7 +202,7 @@ Each phase lists its **Goal**, **Steps**, **Definition of Done (DoD)**, **Learni
 - `GET /api/v1/checks/{id}/status-changes`; detector-lag metric (exported in Phase 3)
 
 **DoD**
-- [ ] Ping tests: unknown ID `404`, oversized body truncated, `429`, every exit code, `HEAD`
+- [x] Ping tests: unknown ID `404`, oversized body truncated, `429`, every exit code, `HEAD`
 - [ ] Schedule tests: periods, cron, several zones, **DST forward and back** (`Europe/London`, `America/New_York`), month ends, leap day, invalid input
 - [ ] State machine test for every transition with a fixed `Clock`
 - [ ] Detector tests: running twice, and two detectors at once, never double-transition
@@ -401,3 +401,8 @@ Each `docs/learnings/phase-N-<slug>.md` follows [`docs/learnings/_TEMPLATE.md`](
 
 ## 7. Later / parking lot
 Team invitations UI, SSO (SAML), PagerDuty/Opsgenie, Telegram, Maven Central publishing, multi-region deployment, payments (Razorpay), and a public status page.
+
+From Phase 2:
+- Per-IP limit for unknown ping UUIDs at the edge (random-UUID floods hit the database; unknown IDs are deliberately not cached)
+- Pin `server.tomcat.remoteip.internal-proxies` to the load balancer (Tomcat trusts every private address by default)
+- Ping write path: fewer round trips per ping and pool sizing (the 2.1 baseline saturates on 10 connections × WAL commit latency)

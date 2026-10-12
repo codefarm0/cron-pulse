@@ -54,7 +54,7 @@ Full steps, Definition of Done and story outlines: **[docs/planning/ROADMAP.md](
 | # | Phase | Learning takeaway | Story | Status |
 |---|---|---|---|---|
 | 1 | Foundations: repo, data model and REST API | Some decisions are cheap on day one and very expensive later | [Draft](docs/learnings/phase-1-foundations.md) | ✅ Built · story in draft |
-| 2 | The heartbeat engine: pings, schedules and detection | Alert on the *absence* of a signal: the dead man's switch | — | 🔜 Next |
+| 2 | The heartbeat engine: pings, schedules and detection | Alert on the *absence* of a signal: the dead man's switch | — | 🚧 In progress |
 | 3 | Observability and reliable alerts | You can't make delivery reliable if you can't see it | — | Planned |
 | 4 | The product: UI, starter and multi-tenant security | One service layer, many front doors, and tenants that never see each other | — | Planned |
 | 5 | Enterprise scale and production readiness | Measure, fix one bottleneck, measure again, and make deploys boring | — | Planned |
