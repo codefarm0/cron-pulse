@@ -1,6 +1,6 @@
 # Local infrastructure for CronPulse.
 #
-#   ./gradlew :app:bootRun             -> Spring Boot starts postgres + mailpit from this file automatically
+#   ./gradlew bootRun             -> Spring Boot starts postgres + mailpit from this file automatically
 #   docker compose --profile app up    -> runs the whole stack in containers, including the app
 #
 # Values come from .env (copy .env.example). The defaults below are for local development only.

@@ -70,13 +70,14 @@ The differentiator: **first-class Spring Boot support**. A small starter library
 | Group | `in.codefarm` |
 | Artifact | `cron-pulse` |
 | Base package | `in.codefarm.cronpulse` |
-| Build | Gradle (Kotlin DSL, `build.gradle.kts`), multi-module |
-| Java | Latest LTS supported by the chosen Spring Boot version (21 minimum) |
+| Build | Gradle (Groovy DSL): a single `build.gradle` and `settings.gradle` at the repo root |
+| Java | 25 (latest LTS supported by the chosen Spring Boot version) |
 | Spring Boot | Latest stable from start.spring.io |
 
-### Modules
-- `app`: the CronPulse service (REST API, Thymeleaf UI, ping ingest, detector, alerts)
-- `cron-pulse-spring-boot-starter`: the client library (Phase 4)
+### Project layout
+A standard single-module Spring Boot project: `build.gradle`, `settings.gradle`, `src/main/java/**`, `src/main/resources/**`, `src/test/java/**` at the repo root. Keep it that way: no sub-modules and no extra build files.
+
+The `@CronPulse` client library (Phase 4) is a **separate repository**, `cron-pulse-spring-boot-starter`, with its own standard layout. It only talks to CronPulse over HTTP, so it doesn't need to share a build with the service.
 
 ## 3. Tech stack
 
@@ -93,15 +94,15 @@ The differentiator: **first-class Spring Boot support**. A small starter library
 - **Cron parsing**: Spring's `CronExpression` (no extra library)
 - **Virtual threads** enabled (`spring.threads.virtual.enabled=true`) for the ping endpoint and alert sending
 - **Docker for all infrastructure**: nothing is installed locally except a JDK and Docker.
-  - `compose.yaml` runs Postgres and Mailpit (plus Redis from Phase 5); Spring Boot Docker Compose support starts it automatically on `./gradlew :app:bootRun`
+  - `compose.yaml` runs Postgres and Mailpit (plus Redis from Phase 5); Spring Boot Docker Compose support starts it automatically on `./gradlew bootRun`
   - Extra compose profiles as phases need them: `scale` (3 app instances + nginx, Phase 5), `observability` (OpenObserve + OpenTelemetry Collector, Phase 3)
-  - A `Dockerfile` (multi-stage, or `./gradlew :app:bootBuildImage`) builds the app image, and a compose profile (e.g. `docker compose --profile app up`) runs the full stack: app + Postgres + Mailpit
+  - A `Dockerfile` (multi-stage, or `./gradlew bootBuildImage`) builds the app image, and a compose profile (e.g. `docker compose --profile app up`) runs the full stack: app + Postgres + Mailpit
   - Testcontainers uses the same Docker daemon for integration tests
 - **Testing**: JUnit 5, `MockMvc` / `@WebMvcTest` for REST and UI controllers, Testcontainers (Postgres), WireMock (Slack and webhook calls), a fixed `Clock`
 
 ### start.spring.io dependencies
 Spring Web, Thymeleaf, Validation, Spring Data JPA, PostgreSQL Driver, Flyway Migration, Java Mail Sender, Docker Compose Support, Spring Boot Actuator, Testcontainers, Spring Boot DevTools.
-Add manually: ShedLock (`shedlock-spring`, `shedlock-provider-jdbc-template`), Bucket4j, springdoc-openapi (`springdoc-openapi-starter-webmvc-ui`), WireMock (test). These are not in the Spring Boot BOM, so pin their versions in one place (a Gradle version catalog, `gradle/libs.versions.toml`).
+Add manually: ShedLock (`shedlock-spring`, `shedlock-provider-jdbc-template`), Bucket4j, springdoc-openapi (`springdoc-openapi-starter-webmvc-ui`), WireMock (test). These are not in the Spring Boot BOM, so pin their versions in one place: the `ext { }` block in `build.gradle`.
 
 (Spring Security is added in Phase 4: session login for the UI, hashed and scoped API keys for `/api/v1/**`, and organisation-based tenant isolation. Until then, a single "default organisation" resolver stands in, kept in one place so it's easy to replace.)
 
@@ -191,7 +192,7 @@ flowchart LR
     tc["Testcontainers<br/>throwaway Postgres for tests"]
     k6["k6 container<br/>load/ script"]
 
-    dev -- "./gradlew :app:bootRun<br/>auto-starts compose services" --> pg
+    dev -- "./gradlew bootRun<br/>auto-starts compose services" --> pg
     dev -- "docker compose --profile app up" --> app
     app --> pg
     app --> mp
@@ -496,7 +497,7 @@ flowchart LR
 
 ## 7. Spring Boot starter (the differentiator)
 
-Module `cron-pulse-spring-boot-starter`:
+Separate repository `cron-pulse-spring-boot-starter` (created in Phase 4):
 
 ```java
 @Scheduled(cron = "0 0 2 * * *")
@@ -542,7 +543,7 @@ The project is built in **5 phases**. Each phase ships working software, has one
 
 | # | Phase | Steps |
 |---|---|---|
-| 1 | Foundations: repo, data model and REST API | 1.1 Gradle multi-module, version catalog, `compose.yaml`, `Dockerfile`, CI, structured logs, ADRs · 1.2 Flyway schema (tenant column everywhere, public IDs), entities, repositories, Testcontainers, seed data · 1.3 `/api/v1/checks`, DTOs, `ProblemDetail`, pagination, idempotency keys, optimistic locking, OpenAPI |
+| 1 | Foundations: repo, data model and REST API | 1.1 Standard Gradle project (`build.gradle`), `compose.yaml`, `Dockerfile`, CI, structured logs, ADRs · 1.2 Flyway schema (tenant column everywhere, public IDs), entities, repositories, Testcontainers, seed data · 1.3 `/api/v1/checks`, DTOs, `ProblemDetail`, pagination, idempotency keys, optimistic locking, OpenAPI |
 | 2 | The heartbeat engine: pings, schedules and detection | 2.1 `/ping/**` variants, 10 KB cap, rate limiting, caching, virtual threads, k6 baseline · 2.2 `Clock`, simple + cron + time zones + DST, schedule preview API · 2.3 `CheckStateMachine`, `status_change`, SKIP LOCKED detector, status timeline API |
 | 3 | Observability and reliable alerts | 3.1 **first:** OTLP export of logs/metrics/traces → OTel Collector → **OpenObserve**, dashboards as code, redaction · 3.2 `Notifier` (email/Slack/webhook), channels API, outbox sender, retries, signing, SSRF guard · 3.3 SLO alerts in OpenObserve, meta-heartbeat |
 | 4 | The product: UI, starter and multi-tenant security | 4.1 Thymeleaf screens from `docs/ui/`, uptime %, live preview · 4.2 `@CronPulse` starter, async client, sample app · 4.3 Spring Security, organisations and roles, API keys, tenant isolation tests, audit log, plan limits, status badge |
@@ -569,7 +570,7 @@ Rules:
 - Never log ping bodies, API keys, webhook secrets or other secrets.
 - No secrets in the repo; everything comes from env vars.
 - A README that explains: what a heartbeat monitor is, how to run locally (with Docker), how to use the REST API (with curl examples and a link to Swagger UI), how to ping from curl and from the starter, and a "How it works" section (state machine, detector, outbox) for learners. It links to [codefarm.in](https://codefarm.in) for deeper material.
-- Use the Gradle wrapper (`./gradlew`) for all build, test and run commands, and keep dependency versions managed by the Spring Boot BOM (non-BOM libraries pinned in the version catalog).
+- Use the Gradle wrapper (`./gradlew`) for all build, test and run commands, and keep dependency versions managed by the Spring Boot BOM (non-BOM libraries pinned in the `ext { }` block of `build.gradle`).
 - All supporting services (Postgres, Mailpit, k6, test databases) run in Docker; the only local prerequisites are a JDK and Docker.
 
 ## 11. Out of scope for now

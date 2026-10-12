@@ -30,7 +30,7 @@
 ## Try it yourself
 ```bash
 git checkout phase-N
-./gradlew :app:bootRun
+./gradlew bootRun
 ```
 
 ## Next in the series

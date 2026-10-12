@@ -16,7 +16,7 @@ This series builds one, CronPulse, from an empty folder to a multi-tenant servic
 
 ## What we built
 
-- A Gradle multi-module project (Spring Boot 4.1, Java 25) that a team could work in on day one: version catalog, Docker Compose for Postgres and Mailpit, a layered non-root Docker image, and CI
+- A standard Spring Boot project (Spring Boot 4.1, Java 25, one `build.gradle`) that a team could work in on day one: Docker Compose for Postgres and Mailpit, a layered non-root Docker image, and CI
 - A Flyway-managed Postgres schema that is **multi-tenant from the first migration**
 - A versioned REST API for checks with RFC 9457 errors, pagination, **idempotency keys** and **optimistic locking**, documented with OpenAPI
 - 40 tests, all against a real Postgres via Testcontainers
@@ -39,13 +39,13 @@ flowchart LR
 Fresh clone, a JDK and Docker, one command:
 
 ```bash
-./gradlew :app:bootRun   # Spring Boot starts Postgres + Mailpit from compose.yaml
+./gradlew bootRun   # Spring Boot starts Postgres + Mailpit from compose.yaml
 ```
 
 Spring Boot's Docker Compose support reads `compose.yaml`, starts the services, and connects the datasource to them. Nothing to install, no README steps to forget. The same file has an `app` profile, so `docker compose --profile app up` runs everything in containers.
 
 Design points worth calling out:
-- **Version catalog** (`gradle/libs.versions.toml`): Spring's BOM manages almost every version. The catalog pins only what the BOM doesn't (springdoc), in one place.
+- **Keep the build boring:** one `build.gradle` in the standard Spring Boot layout. Spring's BOM manages almost every version; the few it doesn't (springdoc) are pinned in one `ext { }` block. We started with a multi-module Kotlin DSL build and a version catalog, and removed them: for a single service they were structure without benefit. The starter library gets its own repository in Phase 4.
 - **Layered, non-root image:** dependencies go in their own layer, so a code change rebuilds only a few kilobytes of the image, and the process doesn't run as root.
 - **Structured logs from day one:** containers log ECS JSON (one event per line), and local runs stay human-readable. Phase 3 only has to *ship* these logs, not retrofit them.
 
@@ -155,7 +155,7 @@ The partial index is ~5× smaller because NEW, DOWN and PAUSED checks never ente
 
 ```bash
 git checkout phase-1
-./gradlew :app:bootRun                       # dev profile: seeded demo data
+./gradlew bootRun                           # dev profile: seeded demo data
 curl -s localhost:8080/api/v1/checks/summary
 # {"total":6,"byStatus":{"NEW":1,"UP":2,"LATE":1,"DOWN":1,"PAUSED":1}}
 

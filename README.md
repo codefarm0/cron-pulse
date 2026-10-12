@@ -60,7 +60,7 @@ Full steps, Definition of Done and story outlines: **[docs/planning/ROADMAP.md](
 | 5 | Enterprise scale and production readiness | Measure, fix one bottleneck, measure again, and make deploys boring | — | Planned |
 
 ### Phase 1: Foundations: repo, data model and REST API
-A repo a team could work in from day one (Gradle multi-module, Docker Compose, Dockerfile, CI, ADRs), a Flyway-managed Postgres schema that is multi-tenant from the first migration, and a versioned `/api/v1` for managing checks with `ProblemDetail` errors, pagination, idempotency keys, optimistic locking and OpenAPI docs.
+A repo a team could work in from day one (standard Spring Boot project, Docker Compose, Dockerfile, CI, ADRs), a Flyway-managed Postgres schema that is multi-tenant from the first migration, and a versioned `/api/v1` for managing checks with `ProblemDetail` errors, pagination, idempotency keys, optimistic locking and OpenAPI docs.
 **You'll learn:** what a heartbeat monitor is; which schema choices are nearly impossible to change later (tenant column, IDs, `timestamptz`); testing against real Postgres with Testcontainers; designing an API that survives client retries and concurrent edits.
 
 ### Phase 2: The heartbeat engine: pings, schedules and detection
@@ -86,11 +86,11 @@ Several instances behind a load balancer, time-partitioned ping storage, Redis-b
 > The only prerequisites are **JDK 25 and Docker**.
 
 ```bash
-./gradlew :app:bootRun              # starts Postgres + Mailpit in Docker automatically
+./gradlew bootRun                   # starts Postgres + Mailpit in Docker automatically
 docker compose --profile app up     # or run the whole stack in containers
 ```
 
-Ports can be changed in `.env` (copy `.env.example`). If 8080 is taken, run with `SERVER_PORT=8081 ./gradlew :app:bootRun` or set `APP_PORT` for Docker.
+Ports can be changed in `.env` (copy `.env.example`). If 8080 is taken, run with `SERVER_PORT=8081 ./gradlew bootRun` or set `APP_PORT` for Docker.
 
 | Service | URL |
 |---|---|
@@ -124,8 +124,10 @@ Every error is `application/problem+json` with a stable `code` (e.g. `VALIDATION
 ## Repository layout
 
 ```
-app/                              # the CronPulse service
-cron-pulse-spring-boot-starter/   # client library (Phase 4)
+build.gradle, settings.gradle     # standard single-module Gradle build
+src/main/java, src/main/resources # the CronPulse service
+src/test/java                     # unit, repository and API tests (Testcontainers)
+compose.yaml, Dockerfile          # local infrastructure and the app image
 samples/                          # sample apps using the starter
 load/                             # k6 load tests
 docs/

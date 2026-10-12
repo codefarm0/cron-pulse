@@ -4,15 +4,13 @@
 FROM eclipse-temurin:25-jdk-noble AS build
 WORKDIR /workspace
 # Copy build files first so the dependency download is cached when only source code changes.
-COPY gradlew settings.gradle.kts build.gradle.kts ./
+COPY gradlew settings.gradle build.gradle ./
 COPY gradle gradle
-COPY app/build.gradle.kts app/
-COPY cron-pulse-spring-boot-starter/build.gradle.kts cron-pulse-spring-boot-starter/
-RUN --mount=type=cache,target=/root/.gradle ./gradlew :app:dependencies --no-daemon -q > /dev/null
-COPY app/src app/src
-RUN --mount=type=cache,target=/root/.gradle ./gradlew :app:bootJar --no-daemon -q
+RUN --mount=type=cache,target=/root/.gradle ./gradlew dependencies --no-daemon -q > /dev/null
+COPY src src
+RUN --mount=type=cache,target=/root/.gradle ./gradlew bootJar --no-daemon -q
 # Split the jar into layers (dependencies change rarely, app code often) for smaller image updates.
-RUN java -Djarmode=tools -jar app/build/libs/app-*.jar extract --layers --launcher --destination /extracted
+RUN java -Djarmode=tools -jar build/libs/cron-pulse-*.jar extract --layers --launcher --destination /extracted
 
 # ---- Runtime stage: JRE only, non-root user ----
 FROM eclipse-temurin:25-jre-noble

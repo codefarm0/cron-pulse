@@ -23,7 +23,7 @@ spring:
       enabled: true
   docker:
     compose:
-      # `./gradlew :app:bootRun` starts Postgres and Mailpit; `stop` keeps their data between runs.
+      # `./gradlew bootRun` starts Postgres and Mailpit; `stop` keeps their data between runs.
       lifecycle-management: start-and-stop
       stop:
         command: stop

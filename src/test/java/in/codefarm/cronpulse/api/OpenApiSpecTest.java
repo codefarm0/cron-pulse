@@ -16,7 +16,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Keeps docs/api/openapi.json in sync with the code. If the API changes, this test fails until the
- * spec is regenerated with {@code ./gradlew :app:test -Popenapi.update=true}, which makes every API
+ * spec is regenerated with {@code ./gradlew test -Popenapi.update=true}, which makes every API
  * change show up in code review as a diff of the contract.
  */
 @SpringBootTest
@@ -24,8 +24,7 @@ import tools.jackson.databind.json.JsonMapper;
 @Import(TestcontainersConfiguration.class)
 class OpenApiSpecTest {
 
-    // Tests run with the app module as working directory.
-    static final Path SPEC = Path.of("..", "docs", "api", "openapi.json");
+    static final Path SPEC = Path.of("docs", "api", "openapi.json");
 
     @Autowired
     MockMvcTester mvc;
@@ -45,7 +44,7 @@ class OpenApiSpecTest {
             Files.writeString(SPEC, pretty);
         }
         assertThat(Files.readString(SPEC))
-                .as("docs/api/openapi.json is out of date; run ./gradlew :app:test -Popenapi.update=true")
+                .as("docs/api/openapi.json is out of date; run ./gradlew test -Popenapi.update=true")
                 .isEqualTo(pretty);
     }
 }

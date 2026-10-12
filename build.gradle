@@ -1,0 +1,65 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.1.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'in.codefarm'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Versions of libraries that are not managed by the Spring Boot BOM. Everything else gets its
+// version from Spring Boot, so upgrading Spring Boot upgrades the whole stack consistently.
+ext {
+    springdocVersion = '3.1.1'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-flyway'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Dev-only: never packaged into the bootJar or the Docker image.
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    // ./gradlew test -Popenapi.update=true rewrites docs/api/openapi.json (see OpenApiSpecTest).
+    systemProperty 'openapi.update', providers.gradleProperty('openapi.update').getOrElse('false')
+}
+
+tasks.named('bootRun') {
+    // Local development uses the dev profile: readable logs and seeded demo data.
+    systemProperty 'spring.profiles.active', 'dev'
+}
+
+tasks.named('jar') {
+    // Only the executable bootJar is needed; skipping the plain jar keeps build/libs unambiguous for the Dockerfile.
+    enabled = false
+}
