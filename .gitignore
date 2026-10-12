@@ -2,15 +2,61 @@
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
+# Never ignore source folders that happen to be named "build"
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-# IDE
+# Java
+*.class
+*.log
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+# JVM crash and replay files
+hs_err_pid*
+replay_pid*
+
+# Spring Initializr leftovers
+HELP.md
+
+# IntelliJ IDEA
 .idea/
 *.iml
-.vscode/
+*.ipr
+*.iws
 out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# Eclipse / Spring Tools
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
 
 # OS
 .DS_Store
+Thumbs.db
 
-# Local secrets: copy .env.example to .env
+# Logs written by the app or tests
+logs/
+
+# Local secrets and environment: copy .env.example to .env
 .env
+.env.*
+!.env.example
