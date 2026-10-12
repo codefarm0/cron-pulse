@@ -1,0 +1,4 @@
+# Local development profile, activated by `./gradlew :app:bootRun`.
+logging:
+  level:
+    in.codefarm.cronpulse: debug

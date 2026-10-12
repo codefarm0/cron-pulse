@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: cron-pulse
+  threads:
+    virtual:
+      # Request handling and blocking I/O run on virtual threads (see CLAUDE.md §3).
+      enabled: true
+  datasource:
+    # Defaults match compose.yaml. In containers and production these come from env vars
+    # (SPRING_DATASOURCE_URL / _USERNAME / _PASSWORD); no real credentials live in the repo.
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:15432/cronpulse}
+    username: ${SPRING_DATASOURCE_USERNAME:cronpulse}
+    password: ${SPRING_DATASOURCE_PASSWORD:cronpulse}
+  jpa:
+    # Flyway owns the schema; Hibernate only checks that entities match it.
+    hibernate:
+      ddl-auto: validate
+    # Don't hold a DB connection open while rendering a response.
+    open-in-view: false
+  docker:
+    compose:
+      # `./gradlew :app:bootRun` starts Postgres and Mailpit; `stop` keeps their data between runs.
+      lifecycle-management: start-and-stop
+      stop:
+        command: stop
+
+server:
+  # Finish in-flight requests before the process exits (rolling deploys, Phase 5).
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true

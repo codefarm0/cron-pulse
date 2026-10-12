@@ -90,11 +90,14 @@ Several instances behind a load balancer, time-partitioned ping storage, Redis-b
 docker compose --profile app up     # or run the whole stack in containers
 ```
 
+Ports can be changed in `.env` (copy `.env.example`). If 8080 is taken, run with `SERVER_PORT=8081 ./gradlew :app:bootRun` or set `APP_PORT` for Docker.
+
 | Service | URL |
 |---|---|
 | App / UI | http://localhost:8080 |
 | Swagger UI (Phase 1+) | http://localhost:8080/swagger-ui.html |
 | Mailpit (caught emails) | http://localhost:8025 |
+| PostgreSQL | `localhost:15432`, db/user `cronpulse` (password from `.env`, default `cronpulse`) |
 | OpenObserve: logs, metrics, traces (Phase 3+, `--profile observability`) | http://localhost:5080 |
 
 ## Repository layout
