@@ -167,7 +167,7 @@ Each phase lists its **Goal**, **Steps**, **Definition of Done (DoD)**, **Learni
 - [ ] CI is green on PRs *(workflow written and the same build passes locally; not yet run on GitHub: no remote)*
 - [x] Repository tests (Testcontainers) including tenant scoping; `EXPLAIN` output for key queries in the learning note
 - [x] `MockMvc` tests: happy paths, `400`, `404`, `409`, `412`, idempotent replay; OpenAPI spec checked in
-- [x] Learning note written ([draft](../learnings/phase-1-foundations.md)) · [ ] tag `phase-1` after review
+- [x] Learning note written ([draft](../learnings/phase-1-foundations.md)); tag `phase-1`
 
 **Learning takeaways**
 - **Headline:** some decisions are cheap on day one and very expensive later: tenant column, ID strategy, `timestamptz`, the API contract, CI
