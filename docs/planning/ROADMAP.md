@@ -101,8 +101,8 @@ Every instance runs the same code: web traffic, the detector and the outbox send
 
 | # | Phase | Headline takeaway | Medium story (working title) | Status |
 |---|---|---|---|---|
-| 1 | Foundations: repo, data model and REST API | Some decisions are cheap on day one and very expensive later: make them now | Who Watches the Cron Jobs? Laying Enterprise Foundations for a Heartbeat Monitor in Spring Boot | 🔜 Next |
-| 2 | The heartbeat engine: pings, schedules and detection | Alert on the *absence* of a signal: building a dead man's switch | Building a Dead Man's Switch: High-Volume Pings, Cron Time Zones and a Detector That Runs Everywhere | Planned |
+| 1 | Foundations: repo, data model and REST API | Some decisions are cheap on day one and very expensive later: make them now | Who Watches the Cron Jobs? Laying Enterprise Foundations for a Heartbeat Monitor in Spring Boot | ✅ Built · story in draft |
+| 2 | The heartbeat engine: pings, schedules and detection | Alert on the *absence* of a signal: building a dead man's switch | Building a Dead Man's Switch: High-Volume Pings, Cron Time Zones and a Detector That Runs Everywhere | 🔜 Next |
 | 3 | Observability and reliable alerts | You can't make delivery reliable if you can't see it | Reliable Alerts You Can See: The Transactional Outbox, Observed with OpenTelemetry and OpenObserve | Planned |
 | 4 | The product: UI, starter and multi-tenant security | One service layer, many front doors, and tenants that never see each other | From Service to Product: Thymeleaf UI, a Spring Boot Starter and Multi-Tenant Security | Planned |
 | 5 | Enterprise scale and production readiness | Measure, find the bottleneck, fix one thing, and make deploys boring | From 300 to 3,000 Requests per Second: Scaling and Shipping a Spring Boot Service to Production | Planned |
@@ -163,11 +163,11 @@ Each phase lists its **Goal**, **Steps**, **Definition of Done (DoD)**, **Learni
 - Temporary "default organisation" resolver until Phase 4 (in one place, easy to replace)
 
 **DoD**
-- [ ] Fresh clone → `./gradlew :app:bootRun` works with only a JDK and Docker; `docker compose --profile app up` serves `/actuator/health` = UP
-- [ ] CI is green on PRs
-- [ ] Repository tests (Testcontainers) including tenant scoping; `EXPLAIN` output for key queries in the learning note
-- [ ] `MockMvc` tests: happy paths, `400`, `404`, `409`, `412`, idempotent replay; OpenAPI spec checked in
-- [ ] Learning note written; tag `phase-1`
+- [x] Fresh clone → `./gradlew :app:bootRun` works with only a JDK and Docker; `docker compose --profile app up` serves `/actuator/health` = UP
+- [ ] CI is green on PRs *(workflow written and the same build passes locally; not yet run on GitHub: no remote)*
+- [x] Repository tests (Testcontainers) including tenant scoping; `EXPLAIN` output for key queries in the learning note
+- [x] `MockMvc` tests: happy paths, `400`, `404`, `409`, `412`, idempotent replay; OpenAPI spec checked in
+- [x] Learning note written ([draft](../learnings/phase-1-foundations.md)) · [ ] tag `phase-1` after review
 
 **Learning takeaways**
 - **Headline:** some decisions are cheap on day one and very expensive later: tenant column, ID strategy, `timestamptz`, the API contract, CI
