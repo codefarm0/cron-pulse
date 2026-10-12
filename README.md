@@ -42,7 +42,7 @@ stateDiagram-v2
 
 CronPulse is designed as if real companies depend on it: multi-tenant from the first migration, horizontally scalable, and observable. The working targets are **100k checks**, **2,000 pings/s sustained** with **10,000/s bursts** at the top of the hour, **p99 < 50 ms** ingest latency, and DOWN detection within **60 s**. See the [roadmap](docs/planning/ROADMAP.md#2-what-enterprise-grade-means-here) for the full list of non-functional requirements.
 
-**Stack:** Java 21+, Spring Boot, Spring MVC (REST API + Thymeleaf UI), PostgreSQL + Flyway, ShedLock / `SKIP LOCKED`, Redis (rate limits, from Phase 5), Micrometer + OpenTelemetry → [OpenObserve](https://openobserve.ai/) (logs, metrics, traces, dashboards), Docker, Testcontainers, WireMock, k6.
+**Stack:** Java 25, Spring Boot 4.1, Spring MVC (REST API + Thymeleaf UI), PostgreSQL + Flyway, ShedLock / `SKIP LOCKED`, Redis (rate limits, from Phase 5), Micrometer + OpenTelemetry → [OpenObserve](https://openobserve.ai/) (logs, metrics, traces, dashboards), Docker, Testcontainers, WireMock, k6.
 
 ---
 
@@ -83,7 +83,7 @@ Several instances behind a load balancer, time-partitioned ping storage, Redis-b
 
 ## Run it locally
 
-> The only prerequisites are **a JDK (21+) and Docker**.
+> The only prerequisites are **JDK 25 and Docker**.
 
 ```bash
 ./gradlew :app:bootRun              # starts Postgres + Mailpit in Docker automatically
