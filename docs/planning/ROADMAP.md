@@ -140,7 +140,7 @@ Each phase lists its **Goal**, **Steps**, **Definition of Done (DoD)**, **Learni
 **Goal:** a repository a team could work in from day one, with a schema built for multi-tenancy and scale, and a versioned REST API for managing checks.
 
 **Step 1.1: Project and delivery setup**
-- Gradle multi-module (Kotlin DSL): `app`, `cron-pulse-spring-boot-starter` (empty for now); version catalog `gradle/libs.versions.toml`
+- Standard single-module Spring Boot project: `build.gradle` (Groovy DSL), `settings.gradle`, `src/main/java`, `src/test/java`; non-BOM versions pinned in `build.gradle`
 - `compose.yaml`: Postgres + Mailpit; Spring Boot Docker Compose support
 - Multi-stage `Dockerfile`; `docker compose --profile app up` runs the full stack
 - GitHub Actions: build + test on every PR (Testcontainers in CI)
@@ -163,7 +163,7 @@ Each phase lists its **Goal**, **Steps**, **Definition of Done (DoD)**, **Learni
 - Temporary "default organisation" resolver until Phase 4 (in one place, easy to replace)
 
 **DoD**
-- [x] Fresh clone → `./gradlew :app:bootRun` works with only a JDK and Docker; `docker compose --profile app up` serves `/actuator/health` = UP
+- [x] Fresh clone → `./gradlew bootRun` works with only a JDK and Docker; `docker compose --profile app up` serves `/actuator/health` = UP
 - [ ] CI is green on PRs *(workflow written and the same build passes locally; not yet run on GitHub: no remote)*
 - [x] Repository tests (Testcontainers) including tenant scoping; `EXPLAIN` output for key queries in the learning note
 - [x] `MockMvc` tests: happy paths, `400`, `404`, `409`, `412`, idempotent replay; OpenAPI spec checked in
@@ -300,7 +300,7 @@ flowchart LR
 - Uptime % per check and the 14-day timeline (calculated from `status_change`); accessibility basics
 
 **Step 4.2: Spring Boot starter**
-- Auto-configuration, `@ConfigurationProperties`, AOP aspect for `@CronPulse`
+- New repository `cron-pulse-spring-boot-starter` (standard layout, its own build); auto-configuration, `@ConfigurationProperties`, AOP aspect for `@CronPulse`
 - Async client with short timeouts and a bounded queue that drops on overload; start / success / fail
 - `samples/demo-app`; starter README; publish to Maven Local
 
