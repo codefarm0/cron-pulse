@@ -526,10 +526,14 @@ Conventions: internal `bigint` identity primary keys; resources exposed by the A
 - `AuditEvent`: id, organization_id, actor (user or API key), action, target_type, target_id, details_json, ip, occurred_at (Phase 4)
 - ShedLock's `shedlock` table
 
-Indexes: `check(ping_uuid)` unique, `check(organization_id, public_id)` unique, `check(organization_id, slug)` unique, `check(status, next_expected_at)`, `ping(check_id, received_at desc)`, `alert_outbox(status, next_attempt_at)`.
+Tables are plural (`checks`, `pings`, …) because `CHECK` is a reserved word in SQL. Child rows (`pings`, `status_changes`, `check_channels`) carry `check_id` but not `organization_id`; they are only read through a tenant-checked check (ADR 0002). Tables are created in the phase that first uses them (e.g. `alert_outbox` in Phase 3, `api_keys` and `audit_events` in Phase 4), each in its own migration.
+
+Indexes: `checks(ping_uuid)` unique, `checks(public_id)` unique, `checks(organization_id, slug)` unique, a **partial** index `checks(next_expected_at) WHERE status IN ('UP','LATE')` for the detector, `pings(check_id, received_at desc)`, `status_changes(check_id, changed_at desc)`, `alert_outbox(status, next_attempt_at)`.
+
+Cron expressions are stored as the user writes them, in classic 5-field format (`0 2 * * *`); Phase 2 converts them for Spring's 6-field `CronExpression`.
 
 ### Seed data
-A Flyway dev-only migration (or a `dev` profile runner) creating one demo organisation and user, 6 checks covering every status, a few days of pings, and one channel of each type, so the dashboard looks real on first run.
+A repeatable Flyway migration `db/dev/R__dev_seed.sql`, only on the Flyway path in the `dev` profile, creating one demo organisation and user, 6 checks covering every status, a few days of pings, and one channel of each type, so the dashboard looks real on first run.
 
 ## 9. Phases
 

@@ -148,7 +148,7 @@ Each phase lists its **Goal**, **Steps**, **Definition of Done (DoD)**, **Learni
 - `.editorconfig`, `.gitignore`, `.env.example`, `docs/adr/0001-record-architecture-decisions.md`
 
 **Step 1.2: Data model for scale**
-- Flyway migrations for all tables in `CLAUDE.md` §8, including `organization` and `membership`. **Every tenant-owned table has `organization_id`**, even though login comes in Phase 4.
+- Flyway migrations, one concept each, for the core tables in `CLAUDE.md` §8: tenancy (`organizations`, `app_users`, `memberships`), `checks`, ping history, alert channels. **Every top-level tenant-owned table has `organization_id`**, even though login comes in Phase 4. Tables for later features (outbox, API keys, audit) arrive with their phase.
 - Internal `bigint` identity primary keys; external `public_id` (random UUID); `ping_uuid` separate and secret
 - All instants `timestamptz`; enums as `text` with `CHECK` constraints; indexes backed by `EXPLAIN`
 - JPA entities and repositories per feature package; Testcontainers repository tests; dev seed data (profile `dev`)
